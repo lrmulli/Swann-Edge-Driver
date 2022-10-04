@@ -1,0 +1,5 @@
+name: 'Swann Bridge'
+packageKey: 'org.mullineux.swannbridge.v1'
+permissions:
+  lan: {}
+  discovery: {}

@@ -10,9 +10,9 @@ function discovery.handle_discovery(driver, _should_continue)
     type = "LAN",
     -- the DNI must be unique across your hub, using static ID here so that we
     -- only ever have a single instance of this "device"
-    device_network_id = "wiser_bridge_1",
-    label = "Wiser Bridge - 1",
-    profile = "wiser-bridge.v1",
+    device_network_id = "swann_bridge_1",
+    label = "Swann Bridge - 1",
+    profile = "swann-bridge.v1",
     manufacturer = "SmartThingsCommunity",
     model = "v1",
     vendor_provided_label = nil

@@ -1,8 +1,8 @@
-# wiser-bridge
-name: wiser-bridge.v1
+# swann-bridge
+name: swann-bridge.v1
 components:
 - id: main
-  label: Add Rooms
+  label: Add Channels
   capabilities:
   - id: momentary
     version: 1
@@ -29,7 +29,7 @@ preferences:
       default: "192.168.1.n"
   - title: "Secret"
     name: secret
-    description: "Wiser Secret"
+    description: "Swann Secret"
     required: true
     preferenceType: string
     definition:

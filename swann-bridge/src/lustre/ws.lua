@@ -57,6 +57,10 @@ function WebSocket.client(socket, url, config)
       id = math.random(),
       state = "Active",
     }, WebSocket)
+
+    ret:register_message_cb(args[1])
+    ret:register_error_cb(args[2])
+    ret:register_close_cb(args[3])
   return ret
 end
 
@@ -68,6 +72,27 @@ end
 function WebSocket.server(socket, config)
   return nil, "Not yet implemented"
 end
+
+---@param cb function called when a complete message has been received
+---@return self WebSocket
+function WebSocket:register_message_cb(cb)
+  if type(cb) == "function" then self.message_cb = cb end
+  return self
+end
+
+---@param cb function called when there is an error
+---@return self WebSocket
+function WebSocket:register_error_cb(cb)
+  if type(cb) == "function" then self.error_cb = cb end
+  return self
+end
+---@param cb function called when the connection was closed
+---@return self WebSocket
+function WebSocket:register_close_cb(cb)
+  if type(cb) == "function" then self.close_cb = cb end
+  return self
+end
+
 
 ---Receive the next message from this websocket
 ---@return Message

@@ -23,6 +23,8 @@ end
 function Listener:try_reconnect()
     local retries = 0
     local ip = self.device:get_field("ip")
+
+
     if not ip then
       log.warn(string.format("[%s](%s) Cannot reconnect because no device ip",
                              harmony_utils.get_serial_number(self.device), self.device.label))
@@ -52,6 +54,8 @@ function Listener:try_reconnect()
     local url = "/"
     local sock, err = socket.tcp()
     local ip = self.device:get_field("ip")
+    local hubId = device:get_field("harmony_hub_id")
+    local hub_path = "/?domain=svcs.myharmony.com&hubId="..hubId
     local serial_number = harmony_utils.get_serial_number(self.device)
     if not ip then
       log.error("failed to get ip address for device")
@@ -65,7 +69,7 @@ function Listener:try_reconnect()
     end
     sock:settimeout(3)
     local config = Config.default():protocol("sync"):keep_alive(30)
-    local websocket = ws.client(sock, "/", config)
+    local websocket = ws.client(sock, hub_path, config)
     websocket:register_message_cb(function(msg)
       local event = self:handle_xml_event(msg.data)
       -- log.debug(string.format("(%s:%s) Websocket message: %s", device.device_network_id, ip, utils.stringify_table(event, nil, true)))

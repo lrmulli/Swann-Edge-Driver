@@ -8,6 +8,7 @@ local cosock = require "cosock"
 local http = cosock.asyncify "socket.http"
 local utils = require "st.utils"
 local Listener = require "listener"
+local harmony_utils = require "utils"
 ltn12 = require("ltn12")
 
 
@@ -49,11 +50,9 @@ end
 -- this is called when a device setting is changed
 local function device_info_changed(driver, device, event, args)
       if args.old_st_store.preferences.deviceaddr ~= device.preferences.deviceaddr then
-        log.info("Swann device address preference changed - "..device.preferences.deviceaddr)
+        log.info("device address preference changed - "..device.preferences.deviceaddr)
         device:set_field("ip", device.preferences.deviceaddr)
-      end
-      if args.old_st_store.preferences.secret ~= device.preferences.secret then
-        log.info("Swann secret preference changed - "..device.preferences.secret)
+        utils.getHarmonyHubId(device,device.preferences.deviceaddr)
       end
   end
 

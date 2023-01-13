@@ -54,7 +54,7 @@ function Listener:try_reconnect()
     local url = "/"
     local sock, err = socket.tcp()
     local ip = self.device:get_field("ip")
-    local hubId = device:get_field("harmony_hub_id")
+    local hubId = self.device:get_field("harmony_hub_id")
     local hub_path = "/?domain=svcs.myharmony.com&hubId="..hubId
     local serial_number = harmony_utils.get_serial_number(self.device)
     if not ip then

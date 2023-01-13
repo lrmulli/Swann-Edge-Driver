@@ -64,7 +64,7 @@ function Listener:try_reconnect()
       return false
     end
     sock:settimeout(3)
-    local config = Config.default():protocol("gabbo"):keep_alive(30)
+    local config = Config.default():protocol("sync"):keep_alive(30)
     local websocket = ws.client(sock, "/", config)
     websocket:register_message_cb(function(msg)
       local event = self:handle_xml_event(msg.data)

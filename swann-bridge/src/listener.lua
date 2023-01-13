@@ -124,7 +124,7 @@ function Listener:try_reconnect()
   
   function Listener:send_msg(text)
     print("Message: "..text)
-    self:websocket:send_text(text)
+    self.websocket:send_text(text)
   end
 
   function Listener:handle_msg_event(msg)

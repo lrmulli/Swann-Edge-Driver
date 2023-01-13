@@ -11,7 +11,9 @@ function command_handlers.push(driver, device, command)
   local listener = Listener.create_device_event_listener(driver, device)
   device:set_field("listener", listener)
   listener:start()
-  listener:send_msg("abc123")
+  local hubId = device:get_field("harmony_hub_id")
+  local payload = '{"hubId": "'..hubId..'","timeout": 60,"hbus": {"cmd": "vnd.logitech.harmony/vnd.logitech.harmony.engine?config","id": "0","params": {"verb": "get"}}}'
+  listener:send_msg(payload)
 end
 
 return command_handlers

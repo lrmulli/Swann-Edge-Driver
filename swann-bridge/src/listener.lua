@@ -13,7 +13,7 @@ local RECONNECT_PERIOD = 120 -- 2 min
 
 local Listener = {}
 Listener.__index = Listener
-Listener.WS_PORT = 8080
+Listener.WS_PORT = 8088
 
 local function is_empty(t)
   -- empty tables should be nil instead

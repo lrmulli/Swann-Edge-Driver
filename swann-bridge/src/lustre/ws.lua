@@ -39,7 +39,8 @@ WebSocket.__index = WebSocket
 ---@param config Config
 ---@return WebSocket
 ---@return string|nil
-function WebSocket.client(socket, url, config)
+function WebSocket.client(socket, url, config,...)
+  local args = {...}
   local _send_tx, _send_rx = cosock.channel.new()
   local _recv_tx, _recv_rx = cosock.channel.new()
   local config = config or Config.default()

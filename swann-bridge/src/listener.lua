@@ -74,8 +74,8 @@ function Listener:try_reconnect()
     local config = Config.default():protocol("sync"):keep_alive(30)
     local websocket = ws.client(sock, hub_path, config)
     websocket:register_message_cb(function(msg)
-      local event = self:handle_xml_event(msg.data)
-      -- log.debug(string.format("(%s:%s) Websocket message: %s", device.device_network_id, ip, utils.stringify_table(event, nil, true)))
+      self:handle_msg_event(msg.data)
+      log.debug(string.format("(%s:%s) Websocket message: %s", device.device_network_id, ip, utils.stringify_table(event, nil, true)))
     end):register_error_cb(function(err)
       -- TODO some muxing on the error conditions
       log.error(string.format("[%s](%s) Websocket error: %s", serial_number,
@@ -122,4 +122,9 @@ function Listener:try_reconnect()
     end
   end
   
+  function Listener:handle_msg_event(msg)
+    log.info(string.format("Msg Recd: %s", msg))
+  end
+
+
   return Listener

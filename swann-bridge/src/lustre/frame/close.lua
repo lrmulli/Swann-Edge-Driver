@@ -1,84 +1,65 @@
+--  Copyright 2021 SmartThings
+--
+--  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+--  except in compliance with the License. You may obtain a copy of the License at:
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--  Unless required by applicable law or agreed to in writing, software distributed under the
+--  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+--  either express or implied. See the License for the specific language governing permissions
+--  and limitations under the License.
+--
+
 ---@class CloseCode
----@field public value integer The numeric code for this close reason
----@field public type string The human friendly close reason
 local CloseCode = {}
 CloseCode.__index = CloseCode
 
 ---@class CloseFrame
----@field public code CloseCode The close reason
----@field public reason string The frame's body which may provide more context to the close code
 local CloseFrame = {}
 CloseFrame.__index = CloseFrame
 
 ---Things closed normally
 ---@return CloseCode
-function CloseCode.normal()
-  return CloseCode.from_int(1000)
-end
+function CloseCode.normal() return CloseCode.from_int(1000) end
 ---Server endpoint is going away
 ---@return CloseCode
-function CloseCode.away()
-  return CloseCode.from_int(1001)
-end
+function CloseCode.away() return CloseCode.from_int(1001) end
 
 ---Protocol based error
 ---@return CloseCode
-function CloseCode.protocol()
-  return CloseCode.from_int(1002)
-end
+function CloseCode.protocol() return CloseCode.from_int(1002) end
 ---Payload is unsupported
 ---@return CloseCode
-function CloseCode.unsupported()
-  return CloseCode.from_int(1003)
-end
+function CloseCode.unsupported() return CloseCode.from_int(1003) end
 ---No close code was provided in a close frame
 ---@return CloseCode
-function CloseCode.status()
-  return CloseCode.from_int(1005)
-end
+function CloseCode.status() return CloseCode.from_int(1005) end
 ---An abnormal closure
 ---@return CloseCode
-function CloseCode.abnormal()
-  return CloseCode.from_int(1006)
-end
+function CloseCode.abnormal() return CloseCode.from_int(1006) end
 ---Payload is invalid
 ---@return CloseCode
-function CloseCode.invalid()
-  return CloseCode.from_int(1007)
-end
+function CloseCode.invalid() return CloseCode.from_int(1007) end
 ---Policy violation
 ---@return CloseCode
-function CloseCode.policy()
-  return CloseCode.from_int(1008)
-end
+function CloseCode.policy() return CloseCode.from_int(1008) end
 ---payload too large
 ---@return CloseCode
-function CloseCode.size()
-  return CloseCode.from_int(1009)
-end
+function CloseCode.size() return CloseCode.from_int(1009) end
 ---No expected extension returned from server
 ---@return CloseCode
-function CloseCode.extension()
-  return CloseCode.from_int(1010)
-end
+function CloseCode.extension() return CloseCode.from_int(1010) end
 ---Server error
 ---@return CloseCode
-function CloseCode.error()
-  return CloseCode.from_int(1011)
-end
+function CloseCode.error() return CloseCode.from_int(1011) end
 ---Server is restarting
 ---@return CloseCode
-function CloseCode.restart()
-  return CloseCode.from_int(1012)
-end
+function CloseCode.restart() return CloseCode.from_int(1012) end
 ---Server is overloaded, try again later
 ---@return CloseCode
-function CloseCode.again()
-  return CloseCode.from_int(1013)
-end
-function CloseCode.tls()
-  return CloseCode.from_int(1015)
-end
+function CloseCode.again() return CloseCode.from_int(1013) end
+function CloseCode.tls() return CloseCode.from_int(1015) end
 
 function CloseCode.from_int(code)
   local ret = {value = code}
@@ -143,25 +124,14 @@ end
 function CloseFrame.decode(bytes)
   local one, two = string.byte(bytes, 1, 2)
   local code = one << 8 | two
-  return CloseFrame.from_parts(code, string.sub(
-    bytes, 3))
+  return CloseFrame.from_parts(code, string.sub(bytes, 3))
 end
 
 function CloseFrame.from_parts(code, reason)
-  if type(code) == "number" then
-    code = CloseCode.from_int(code)
-  end
-  return setmetatable({
-    code = code or CloseCode.normal(),
-    reason = reason or "",
-  }, CloseFrame)
+  if type(code) == "number" then code = CloseCode.from_int(code) end
+  return setmetatable({code = code or CloseCode.normal(), reason = reason or ""}, CloseFrame)
 end
 
-function CloseFrame:encode()
-  return self.code:encode() .. self.reason
-end
+function CloseFrame:encode() return self.code:encode() .. self.reason end
 
-return {
-  CloseCode = CloseCode,
-  CloseFrame = CloseFrame,
-}
+return {CloseCode = CloseCode, CloseFrame = CloseFrame}

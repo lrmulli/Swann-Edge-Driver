@@ -1,6 +1,17 @@
+--  Copyright 2021 SmartThings
+--
+--  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+--  except in compliance with the License. You may obtain a copy of the License at:
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--  Unless required by applicable law or agreed to in writing, software distributed under the
+--  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+--  either express or implied. See the License for the specific language governing permissions
+--  and limitations under the License.
+--
+
 ---@class Config
----The configuration of a websocket provided at connection time
----
 ---@field private _max_queue_size number|nil
 ---@field private _max_frame_size number
 ---@field private _max_message_size number
@@ -8,7 +19,6 @@
 ---@field public extensions table[]
 ---@field public protocols string[]
 ---@field private _keep_alive number|nil
----@field private _extra_headers table[]
 local Config = {}
 Config.__index = Config
 
@@ -28,7 +38,6 @@ function Config.default()
     extensions = {},
     protocols = {},
     _keep_alive = nil,
-    _extra_headers = {}
   }, Config)
 end
 
@@ -44,8 +53,7 @@ end
 ---@param size number|nil
 ---@return Config
 function Config:max_message_size(size)
-  self._max_message_size =
-    size or DEFAULT_MAX_MESSAGE
+  self._max_message_size = size or DEFAULT_MAX_MESSAGE
   return self
 end
 
@@ -61,40 +69,22 @@ end
 ---@param size number|nil
 ---@return Config
 function Config:max_frames_without_pong(size)
-  self._max_frames_without_pong =
-    size or DEFAULT_MAX_FRAMES_WITHOUT_PONG
+  self._max_frames_without_pong = size or DEFAULT_MAX_FRAMES_WITHOUT_PONG
   return self
 end
 
----Add an entry to the enabled extensions
----@param name string
----@param params string[]
----@return Config
 function Config:extension(name, params)
-  table.insert(self.extensions,
-    {name = name, params = params})
+  table.insert(self.extensions, {name = name, params = params})
   return self
 end
 
----Add an entry to the enabled protocols
----@param name string
----@return Config
 function Config:protocol(name)
   table.insert(self.protocols, name)
   return self
 end
 
----Set the keep alive value in number of seconds. This will control
----how often an idle websocket will send a "ping" frame
----@param timeout any
----@return Config
 function Config:keep_alive(timeout)
   self._keep_alive = timeout
-  return self
-end
-
-function Config:header(key, value)
-  self._extra_headers[key] = value
   return self
 end
 

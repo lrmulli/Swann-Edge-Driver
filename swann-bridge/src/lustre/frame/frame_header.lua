@@ -1,4 +1,18 @@
-local OpCode = require"lustre.frame.opcode"
+--  Copyright 2021 SmartThings
+--
+--  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+--  except in compliance with the License. You may obtain a copy of the License at:
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--  Unless required by applicable law or agreed to in writing, software distributed under the
+--  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+--  either express or implied. See the License for the specific language governing permissions
+--  and limitations under the License.
+--
+
+local OpCode = require "lustre.frame.opcode"
+local opcode = require "lustre.frame.opcode"
 local U16_MAX = 0xFFFF
 
 ---@class FrameHeader
@@ -23,9 +37,7 @@ FrameHeader.__index = FrameHeader
 ---@return integer
 local function decode_uint(bytes)
   local ret = 0
-  for i, v in ipairs(bytes) do
-    ret = (ret << 8) | v
-  end
+  for i, v in ipairs(bytes) do ret = (ret << 8) | v end
   return ret
 end
 
@@ -33,9 +45,7 @@ end
 ---@param v integer The number to extract from
 ---@param start integer What bit to start at
 ---@return integer @ should always be between 0 and 255
-local function extract_u8(v, start)
-  return (v >> start) & 255
-end
+local function extract_u8(v, start) return (v >> start) & 255 end
 
 ---Convert a value into an array of bytes with the provided length
 ---@param v integer
@@ -59,57 +69,38 @@ end
 ---@return integer @The length of the decoded value (0, 2 or 8)
 local function decode_len(byte, bytes)
   local len_byte = byte & 0x7f
-  if len_byte < 126 then
-    return len_byte, 0
-  end
+  if len_byte < 126 then return len_byte, 0 end
   local extra_bytes = {}
   if len_byte == 126 then
-    extra_bytes = table.pack(
-      string.byte(bytes, 1, 2))
-    if #extra_bytes < 2 then
-      return nil, 2
-    end
-    return (extra_bytes[1] << 8) | extra_bytes[2],
-      2
+    extra_bytes = table.pack(string.byte(bytes, 1, 2))
+    if #extra_bytes < 2 then return nil, 2 end
+    return (extra_bytes[1] << 8) | extra_bytes[2], 2
   elseif len_byte == 127 then
-    extra_bytes = table.pack(
-      string.byte(bytes, 1, 8))
-    if #extra_bytes < 8 then
-      return nil, 8
-    end
+    extra_bytes = table.pack(string.byte(bytes, 1, 8))
+    if #extra_bytes < 8 then return nil, 8 end
     local u64 = decode_uint(extra_bytes)
     -- Most significant bit means we found an invalid value, return nil
-    if u64 < 0 then
-      return nil, 8
-    end
+    if u64 < 0 then return nil, 8 end
     return u64, 8
   end
 end
 
 local function decode_len_stream(byte, socket)
   local len_byte = byte & 0x7f
-  if len_byte < 126 then
-    return len_byte, 0
-  end
+  if len_byte < 126 then return len_byte, 0 end
   local extra_bytes = {}
   if len_byte == 126 then
     local next_2_bytes = assert(socket:receive(2))
-    extra_bytes = table.pack(
-      string.byte(next_2_bytes, 1, 2))
-    assert(#extra_bytes >= 2,
-      "Too few length bytes")
-    return (extra_bytes[1] << 8) | extra_bytes[2],
-      2
+    extra_bytes = table.pack(string.byte(next_2_bytes, 1, 2))
+    assert(#extra_bytes >= 2, "Too few length bytes")
+    return (extra_bytes[1] << 8) | extra_bytes[2], 2
   elseif len_byte == 127 then
     local bytes = assert(socket:receive(8))
-    extra_bytes = table.pack(
-      string.byte(bytes, 1, 8))
+    extra_bytes = table.pack(string.byte(bytes, 1, 8))
     assert(#extra_bytes >= 8)
     local u64 = decode_uint(extra_bytes)
     -- Most significant bit means we found an invalid value, return nil
-    if u64 < 0 then
-      return nil, 8
-    end
+    if u64 < 0 then return nil, 8 end
     return u64, 8
   end
 end
@@ -118,21 +109,15 @@ end
 ---@param bytes string
 ---@return integer[]|nil
 local function decode_mask(bytes)
-  local mask =
-    table.pack(string.byte(bytes, 1, 4))
-  if #mask < 4 then
-    return
-  end
+  local mask = table.pack(string.byte(bytes, 1, 4))
+  if #mask < 4 then return end
   return mask
 end
 
 local function decode_mask_stream(socket)
   local bytes = assert(socket:receive(4))
-  local mask =
-    table.pack(string.byte(bytes, 1, 4))
-  if #mask < 4 then
-    return
-  end
+  local mask = table.pack(string.byte(bytes, 1, 4))
+  if #mask < 4 then return end
   return mask
 end
 
@@ -141,8 +126,7 @@ end
 ---@return table
 local function decode_header(bytes)
   local idx = 1
-  local first_byte, second_byte =
-    string.byte(bytes, idx, 2)
+  local first_byte, second_byte = string.byte(bytes, idx, 2)
   idx = idx + 2
   local fin = first_byte & 0x80 ~= 0
   local rsv1 = first_byte & 0x40 ~= 0
@@ -150,13 +134,10 @@ local function decode_header(bytes)
   local rsv3 = first_byte & 0x10 ~= 0
   local opcode = OpCode.decode(first_byte & 0x0f)
   local masked = (second_byte & 0x80) ~= 0
-  local length, length_length =
-    decode_len(second_byte, string.sub(bytes, idx))
+  local length, length_length = decode_len(second_byte, string.sub(bytes, idx))
   idx = idx + length_length
   local mask
-  if masked then
-    mask = decode_mask(string.sub(bytes, idx))
-  end
+  if masked then mask = decode_mask(string.sub(bytes, idx)) end
   return {
     fin = fin,
     rsv1 = rsv1,
@@ -172,24 +153,17 @@ local function decode_header(bytes)
 end
 
 local function decode_header_stream(socket)
-  local bytes, err = socket:receive(2)
-  if not bytes then
-    return nil, err
-  end
-  local first_byte, second_byte =
-    string.byte(bytes, 1, 2)
+  local bytes = assert(socket:receive(2))
+  local first_byte, second_byte = string.byte(bytes, 1, 2)
   local fin = first_byte & 0x80 ~= 0
   local rsv1 = first_byte & 0x40 ~= 0
   local rsv2 = first_byte & 0x20 ~= 0
   local rsv3 = first_byte & 0x10 ~= 0
   local opcode = OpCode.decode(first_byte & 0x0f)
   local masked = (second_byte & 0x80) ~= 0
-  local length, length_length =
-    decode_len_stream(second_byte, socket)
+  local length, length_length = decode_len_stream(second_byte, socket)
   local mask
-  if masked then
-    mask = decode_mask_stream(socket)
-  end
+  if masked then mask = decode_mask_stream(socket) end
   return {
     fin = fin,
     rsv1 = rsv1,
@@ -205,14 +179,8 @@ local function decode_header_stream(socket)
 end
 
 function FrameHeader.from_stream(socket)
-  local s, t, e = pcall(decode_header_stream,
-    socket)
-  if not s then
-    return nil, t
-  end
-  if not t then
-    return nil, e
-  end
+  local s, t = pcall(decode_header_stream, socket)
+  if not s then return nil, t end
   return setmetatable(t, FrameHeader)
 end
 
@@ -221,10 +189,7 @@ end
 ---@return FrameHeader|nil
 ---@return nil|string @error message
 function FrameHeader.decode(bytes)
-  if #bytes < 2 then
-    return nil,
-      "Expected at least 2 bytes for the frame header"
-  end
+  if #bytes < 2 then return nil, "Expected at least 2 bytes for the frame header" end
   local header = decode_header(bytes)
   return setmetatable(header, FrameHeader)
 end
@@ -232,39 +197,23 @@ end
 ---Get the total length of this header, including the length of anyway
 ---included mask and the length of the payload length
 ---@return number
-function FrameHeader:len()
-  return 2 + self.mask_length + self.length_length
-end
+function FrameHeader:len() return 2 + self.mask_length + self.length_length end
 
 ---Get the payload's length from this header
 ---@return integer|nil
-function FrameHeader:payload_len()
-  return self.length
-end
+function FrameHeader:payload_len() return self.length end
 
 ---Encode this header into a a string
 ---@return string|nil, string|nil
 function FrameHeader:encode()
-  if self.length == nil then
-    return nil, "Invalid length"
-  end
+  if self.length == nil then return nil, "Invalid length" end
   local bytes = {0, 0}
-  if self.fin then
-    bytes[1] = bytes[1] | 0x80
-  end
-  if self.rsv1 then
-    bytes[1] = bytes[1] | 0x40
-  end
-  if self.rsv2 then
-    bytes[1] = bytes[1] | 0x20
-  end
-  if self.rsv3 then
-    bytes[1] = bytes[1] | 0x10
-  end
+  if self.fin then bytes[1] = bytes[1] | 0x80 end
+  if self.rsv1 then bytes[1] = bytes[1] | 0x40 end
+  if self.rsv2 then bytes[1] = bytes[1] | 0x20 end
+  if self.rsv3 then bytes[1] = bytes[1] | 0x10 end
   bytes[1] = bytes[1] | self.opcode:encode()
-  if self.mask then
-    bytes[2] = bytes[2] | 0x80
-  end
+  if self.mask then bytes[2] = bytes[2] | 0x80 end
   if self.length_length == 0 then
     bytes[2] = bytes[2] | self.length
   else
@@ -273,20 +222,15 @@ function FrameHeader:encode()
     else
       bytes[2] = bytes[2] | 127
     end
-    for _, byte in ipairs(
-      encode_uint(self.length, self.length_length)) do
+    for _, byte in ipairs(encode_uint(self.length, self.length_length)) do
       table.insert(bytes, byte)
     end
   end
-  for _, byte in ipairs(self.mask or {}) do
-    table.insert(bytes, byte)
-  end
+  for _, byte in ipairs(self.mask or {}) do table.insert(bytes, byte) end
   return string.char(table.unpack(bytes))
 end
 
-function FrameHeader:is_masked()
-  return self.masked
-end
+function FrameHeader:is_masked() return self.masked end
 
 -- #Builder
 
@@ -371,10 +315,7 @@ end
 ---@return FrameHeader
 function FrameHeader:set_mask(value)
   self.mask_length = value and 4
-  if self.mask_length ~= 4 then
-    return nil,
-      "Failed to set mask, must be 4 bytes"
-  end
+  if self.mask_length ~= 4 then return nil, "Failed to set mask, must be 4 bytes" end
   self.masked = value ~= nil
   self.mask = value
   return self

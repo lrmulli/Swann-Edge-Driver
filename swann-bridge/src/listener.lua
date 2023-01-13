@@ -122,9 +122,9 @@ function Listener:try_reconnect()
     end
   end
   
-  function Listener:send_msg(msg)
-    print("Message: "..msg)
-    self.websocket.send_text(msg)
+  function Listener:send_msg(text)
+    print("Message: "..text)
+    self.websocket.send_text(text)
   end
 
   function Listener:handle_msg_event(msg)

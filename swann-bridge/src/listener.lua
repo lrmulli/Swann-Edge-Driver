@@ -123,6 +123,7 @@ function Listener:try_reconnect()
   end
   
   function Listener:send_msg(msg)
+    log.info(string.format("Sending Message: %s", msg))
     self.websocket.send_text(msg)
   end
 

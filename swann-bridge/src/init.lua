@@ -35,6 +35,9 @@ local function device_init(driver, device)
   if (device:component_exists("bridgelogger")) then --this means that it is a wiser bridge
     --driver:call_on_schedule(60, function () poll(driver,device) end, 'POLLING')
   end
+  local listener = Listener.create_device_event_listener(driver, device)
+  device:set_field("listener", listener)
+  listener:start()
 end
 
 -- this is called when a device is removed by the cloud and synchronized down to the hub
@@ -46,6 +49,7 @@ end
 local function device_info_changed(driver, device, event, args)
       if args.old_st_store.preferences.deviceaddr ~= device.preferences.deviceaddr then
         log.info("Swann device address preference changed - "..device.preferences.deviceaddr)
+        device:set_field("ip", device.preferences.deviceaddr)
       end
       if args.old_st_store.preferences.secret ~= device.preferences.secret then
         log.info("Swann secret preference changed - "..device.preferences.secret)

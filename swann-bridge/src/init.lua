@@ -52,7 +52,7 @@ local function device_info_changed(driver, device, event, args)
       if args.old_st_store.preferences.deviceaddr ~= device.preferences.deviceaddr then
         log.info("device address preference changed - "..device.preferences.deviceaddr)
         device:set_field("ip", device.preferences.deviceaddr)
-        utils.getHarmonyHubId(device,device.preferences.deviceaddr)
+        local hid = utils.getHarmonyHubId(device,device.preferences.deviceaddr)
       end
   end
 

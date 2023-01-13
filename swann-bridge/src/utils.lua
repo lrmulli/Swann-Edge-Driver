@@ -44,6 +44,7 @@ utils.getHarmonyHubId = function(device,ipAddress)
     local resp = json.decode(respbody)
     print(resp.data.activeRemoteId)
     device:set_field("harmony_hub_id",resp.data.activeRemoteId)
-  end
+    return resp.data.activeRemoteId
+end
 
 return utils

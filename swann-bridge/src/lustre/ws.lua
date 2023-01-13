@@ -91,7 +91,7 @@ end
 ---@param text string
 ---@return err string|nil
 function WebSocket:send_text(text)
-  print "Message: "..text
+  print("Message: "..text)
   local data_idx = 1
   local frames_sent = 0
   if self._close_frame_sent then return "currently closing connection" end

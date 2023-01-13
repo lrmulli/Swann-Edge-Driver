@@ -1,5 +1,5 @@
 local sha1 = require"sha1"
-local base64 = require"base64"
+local base64 = require "st.base64"
 local seeded = false
 local function seed_once()
   if seeded then

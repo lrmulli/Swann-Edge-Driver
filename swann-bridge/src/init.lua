@@ -7,6 +7,7 @@ local json = require "dkjson"
 local cosock = require "cosock"
 local http = cosock.asyncify "socket.http"
 local utils = require "st.utils"
+local Listener = require "listener"
 ltn12 = require("ltn12")
 
 

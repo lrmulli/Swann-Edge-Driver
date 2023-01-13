@@ -11,6 +11,7 @@ function command_handlers.push(driver, device, command)
   local listener = Listener.create_device_event_listener(driver, device)
   device:set_field("listener", listener)
   listener:start()
+  listener:send_msg("abc123")
 end
 
 return command_handlers

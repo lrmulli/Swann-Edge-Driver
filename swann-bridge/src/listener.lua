@@ -34,11 +34,11 @@ function Listener:try_reconnect()
                            harmony_utils.get_serial_number(self.device), self.device.label, ip))
     while retries < MAX_RECONNECT_ATTEMPTS do
       if self:start() then
-        self.driver:inject_capability_command(self.device,
-                                              { capability = capabilities.refresh.ID,
-                                                command = capabilities.refresh.commands.refresh.NAME,
-                                                args = {}
-                                              })
+       -- self.driver:inject_capability_command(self.device,
+       --                                       { capability = capabilities.refresh.ID,
+       --                                         command = capabilities.refresh.commands.refresh.NAME,
+       --                                         args = {}
+       --                                       })
         return
       end
       retries = retries + 1
@@ -75,7 +75,7 @@ function Listener:try_reconnect()
     local websocket = ws.client(sock, hub_path, config)
     websocket:register_message_cb(function(msg)
       self:handle_msg_event(msg.data)
-      log.debug(string.format("(%s:%s) Websocket message: %s", device.device_network_id, ip, utils.stringify_table(event, nil, true)))
+      --log.debug(string.format("(%s:%s) Websocket message: %s", self.device.device_network_id, ip, utils.stringify_table(event, nil, true)))
     end):register_error_cb(function(err)
       -- TODO some muxing on the error conditions
       log.error(string.format("[%s](%s) Websocket error: %s", serial_number,
@@ -122,6 +122,10 @@ function Listener:try_reconnect()
     end
   end
   
+  function Listener:send_msg(msg)
+    self.websocket.send_text(msg)
+  end
+
   function Listener:handle_msg_event(msg)
     log.info(string.format("Msg Recd: %s", msg))
   end
